@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title h4 mb-0">{{ user.username }}'s Profile</h2>
+            </div>
+            <div class="card-body text-center">
+                <img class="rounded-circle img-thumbnail mb-3" style="width: 150px; height: 150px;"
+                     src="{{ user.profile.image.url }}" alt="{{ user.username }}'s profile picture">
+                <h5>{{ user.username }}</h5>
+                <p class="text-muted">{{ user.email }}</p>
+                {% if user.profile.phone_number %}
+                    <p><i class="fas fa-phone me-2"></i> {{ user.profile.phone_number }}</p>
+                {% endif %}
+                {% if user.profile.address %}
+                    <p><i class="fas fa-map-marker-alt me-2"></i> {{ user.profile.address }}</p>
+                {% endif %}
+                <div class="d-grid gap-2">
+                    <a href="{% url 'user-bookings' %}" class="btn btn-outline-primary">My Bookings</a>
+                    <a href="{% url 'user-properties' %}" class="btn btn-outline-secondary">My Properties</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title h4 mb-0">Edit Profile</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <fieldset>
+                        <legend class="border-bottom mb-4">Account Information</legend>
+                        <!-- User form -->
+                        {% for field in u_form %}
+                            <div class="mb-3">
+                                {{ field.label_tag }}
+                                {{ field|add_class:'form-control' }}
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </fieldset>
+                    <fieldset>
+                        <legend class="border-bottom mb-4">Profile Information</legend>
+                        <!-- Profile form -->
+                        {% for field in p_form %}
+                            <div class="mb-3">
+                                {{ field.label_tag }}
+                                {{ field|add_class:'form-control' }}
+                                {% if field.name == 'image' %}
+                                    <small class="form-text text-muted">Current: {{ user.profile.image.url }}</small>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </fieldset>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" type="submit">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

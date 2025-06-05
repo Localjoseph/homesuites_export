@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">My Bookings</h1>
+
+{% if bookings %}
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Filter Bookings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="nav flex-column nav-pills">
+                        <a class="nav-link active" href="#" data-filter="all">All Bookings</a>
+                        <a class="nav-link" href="#" data-filter="pending">Pending</a>
+                        <a class="nav-link" href="#" data-filter="confirmed">Confirmed</a>
+                        <a class="nav-link" href="#" data-filter="completed">Completed</a>
+                        <a class="nav-link" href="#" data-filter="cancelled">Cancelled</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card-list">
+                {% for booking in bookings %}
+                    <div class="card mb-3 shadow-sm booking-card" data-status="{{ booking.status }}">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                {% if booking.rental_property.main_image %}
+                                    <img src="{{ booking.rental_property.main_image }}" class="img-fluid rounded-start" alt="{{ booking.rental_property.title }}" style="height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-light text-center h-100 d-flex align-items-center justify-content-center rounded-start">
+                                        <i class="fas fa-home fa-3x text-secondary"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h5 class="card-title">{{ booking.rental_property.title }}</h5>
+                                        <span class="badge bg-{{ booking.status }}">{{ booking.status|title }}</span>
+                                    </div>
+                                    <p class="card-text">
+                                        <i class="fas fa-map-marker-alt text-danger me-1"></i> 
+                                        {{ booking.rental_property.city }}, {{ booking.rental_property.country }}
+                                    </p>
+                                    <p class="card-text">
+                                        <i class="fas fa-calendar-alt me-1"></i> 
+                                        {{ booking.check_in|date:"M d, Y" }} to {{ booking.check_out|date:"M d, Y" }}
+                                    </p>
+                                    <p class="card-text">
+                                        <i class="fas fa-users me-1"></i> 
+                                        {{ booking.guests }} guest{% if booking.guests != 1 %}s{% endif %}
+                                    </p>
+                                    <p class="card-text">
+                                        <strong>Total:</strong> ${{ booking.total_price }}
+                                    </p>
+                                    <div class="d-flex">
+                                        <a href="{% url 'booking-detail' booking.id %}" class="btn btn-outline-primary me-2">View Details</a>
+                                        {% if booking.status == 'pending' or booking.status == 'confirmed' %}
+                                            <a href="{% url 'cancel-booking' booking.id %}" class="btn btn-outline-danger">Cancel</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-info text-center">
+        <h4 class="alert-heading">No Bookings Found</h4>
+        <p>You don't have any bookings yet. Start exploring properties to find your next stay!</p>
+        <a href="{% url 'property-list' %}" class="btn btn-primary">Explore Properties</a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Booking filter functionality
+    const filterLinks = document.querySelectorAll('.nav-link[data-filter]');
+    const bookingCards = document.querySelectorAll('.booking-card');
+    
+    filterLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all links
+            filterLinks.forEach(l => l.classList.remove('active'));
+            // Add active class to clicked link
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            
+            bookingCards.forEach(card => {
+                if (filter === 'all' || card.getAttribute('data-status') === filter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

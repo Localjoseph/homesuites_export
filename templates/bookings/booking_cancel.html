@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Cancel Booking{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h2 class="card-title h4 mb-0">Cancel Booking</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h5 class="alert-heading">Warning!</h5>
+                    <p>Are you sure you want to cancel this booking? This action cannot be undone.</p>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        {% if booking.rental_property.main_image %}
+                            <img src="{{ booking.rental_property.main_image }}" class="img-fluid rounded" alt="{{ booking.rental_property.title }}">
+                        {% else %}
+                            <div class="bg-light text-center py-5 rounded">
+                                <i class="fas fa-home fa-3x text-secondary"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <h3>{{ booking.rental_property.title }}</h3>
+                        <p class="text-muted">
+                            <i class="fas fa-map-marker-alt me-1"></i> 
+                            {{ booking.rental_property.city }}, {{ booking.rental_property.country }}
+                        </p>
+                        <p class="mb-1">
+                            <i class="fas fa-calendar-alt me-1"></i> 
+                            <strong>Check In:</strong> {{ booking.check_in|date:"F d, Y" }}
+                        </p>
+                        <p class="mb-1">
+                            <i class="fas fa-calendar-check me-1"></i> 
+                            <strong>Check Out:</strong> {{ booking.check_out|date:"F d, Y" }}
+                        </p>
+                        <p class="mb-1">
+                            <i class="fas fa-users me-1"></i> 
+                            <strong>Guests:</strong> {{ booking.guests }}
+                        </p>
+                        {% if booking.guest != user %}
+                            <p class="mb-1">
+                                <i class="fas fa-user me-1"></i> 
+                                <strong>Guest:</strong> {{ booking.guest.username }}
+                            </p>
+                        {% endif %}
+                        <p class="fw-bold">
+                            <i class="fas fa-money-bill-wave me-1"></i> 
+                            <strong>Total:</strong> ${{ booking.total_price }}
+                        </p>
+                    </div>
+                </div>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        {% if user == booking.guest %}
+                            <a href="{% url 'user-bookings' %}" class="btn btn-outline-secondary">Back to My Bookings</a>
+                        {% else %}
+                            <a href="{% url 'host-bookings' %}" class="btn btn-outline-secondary">Back to Booking Requests</a>
+                        {% endif %}
+                        <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

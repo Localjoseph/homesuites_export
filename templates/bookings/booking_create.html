@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Book {{ property.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title h4 mb-0">Book Your Stay</h2>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        {% if property.main_image %}
+                            <img src="{{ property.main_image }}" class="img-fluid rounded" alt="{{ property.title }}">
+                        {% else %}
+                            <div class="bg-light text-center py-5 rounded">
+                                <i class="fas fa-home fa-4x text-secondary"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <h3>{{ property.title }}</h3>
+                        <p class="text-muted">
+                            <i class="fas fa-map-marker-alt me-1"></i> 
+                            {{ property.address }}, {{ property.city }}, {{ property.country }}
+                        </p>
+                        <p class="mb-1">
+                            <i class="fas fa-user-friends me-1"></i> Up to {{ property.accommodates }} guests
+                        </p>
+                        <p class="mb-1">
+                            <i class="fas fa-bed me-1"></i> {{ property.bedrooms }} bedroom{% if property.bedrooms != 1 %}s{% endif %}
+                        </p>
+                        <p>
+                            <i class="fas fa-bath me-1"></i> {{ property.bathrooms }} bathroom{% if property.bathrooms != 1 %}s{% endif %}
+                        </p>
+                        <p class="fw-bold">${{ property.price_per_night }} per night</p>
+                    </div>
+                </div>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.check_in.id_for_label }}" class="form-label">Check In Date</label>
+                                {{ form.check_in|add_class:'form-control' }}
+                                {% for error in form.check_in.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.check_out.id_for_label }}" class="form-label">Check Out Date</label>
+                                {{ form.check_out|add_class:'form-control' }}
+                                {% for error in form.check_out.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.guests.id_for_label }}" class="form-label">Number of Guests</label>
+                        {{ form.guests|add_class:'form-control' }}
+                        <small class="form-text text-muted">Maximum {{ property.accommodates }} guests</small>
+                        {% for error in form.guests.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.special_requests.id_for_label }}" class="form-label">Special Requests (Optional)</label>
+                        {{ form.special_requests|add_class:'form-control' }}
+                        {% for error in form.special_requests.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'property-detail' property.id %}" class="btn btn-outline-secondary">Back to Property</a>
+                        <button class="btn btn-primary" type="submit">Confirm Booking</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
